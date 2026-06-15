@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheekypedia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --blue-950: #172554;
+            --blue-900: #1e3a8a;
+            --blue-800: #1e40af;
+            --blue-700: #1d4ed8;
+            --blue-600: #2563eb;
+            --blue-100: #dbeafe;
+            --blue-50:  #eff6ff;
+            --sky-100:  #e0f2fe;
+            --ink:      #1f2937;
+            --muted:    #64748b;
+            --border:   #bfdbfe;
+            --paper:    #ffffff;
+        }
+
+        body {
+            font-family: 'DM Sans', 'Segoe UI', sans-serif;
+            background: var(--blue-50);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+            padding: 2rem 2.5rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        header::after {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            right: -90px;
+            top: -120px;
+            background: rgba(255,255,255,0.12);
+        }
+        header h1 {
+            font-family: Georgia, serif;
+            font-size: 2.2rem;
+            color: #f8fbff;
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        header p {
+            font-size: 13px;
+            color: #cfe4ff;
+            margin-bottom: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+        .header-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+        .badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .badge-blue { background: rgba(255,255,255,0.12); color: #dbeafe; border: 1px solid rgba(219,234,254,0.42); }
+        .badge-cyan { background: rgba(224,242,254,0.16); color: #bae6fd; border: 1px solid rgba(186,230,253,0.4); }
+
+        /* ── SEARCH ROW ── */
+        .search-row {
+            display: flex;
+            gap: 10px;
+            padding: 1.25rem 2.5rem 0.75rem;
+            background: var(--blue-50);
+        }
+        .search-row input {
+            flex: 1;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0 14px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-row input:focus {
+            border-color: var(--blue-600);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        .search-row input::placeholder { color: #94a3b8; }
+        .search-row button {
+            height: 40px;
+            padding: 0 20px;
+            background: var(--blue-700);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background 0.15s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .search-row button:hover { background: var(--blue-800); transform: translateY(-1px); }
+        .search-row button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        /* ── TOPIC CHIPS ── */
+        .topic-chips-wrap {
+            padding: 0 2.5rem 0.75rem;
+            background: var(--blue-50);
+        }
+        .chips-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .topic-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip {
+            padding: 5px 14px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: white;
+            font-size: 12px;
+            font-family: inherit;
+            color: var(--blue-800);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chip:hover { background: var(--blue-700); color: white; border-color: var(--blue-700); }
+
+        /* ── META ── */
+        #stats {
+            padding: 0.5rem 2.5rem 0.5rem;
+            font-size: 12px;
+            color: #475569;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: none;
+        }
+
+        /* ── RESULT AREA ── */
+        .result-wrap {
+            padding: 0 2.5rem 2.5rem;
+        }
+
+        .article-card {
+            display: none;
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 14px 34px rgba(30, 64, 175, 0.08);
+            animation: fadeUp 0.35s ease both;
+        }
+        .article-card.visible { display: grid; grid-template-columns: minmax(0, 1fr) 280px; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .article-main { padding: 1.35rem 1.45rem 1.45rem; }
+        .article-kicker {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--blue-700);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .article-title {
+            font-family: Georgia, serif;
+            font-size: 1.9rem;
+            line-height: 1.1;
+            color: var(--blue-950);
+            font-weight: 500;
+            margin-bottom: 0.35rem;
+        }
+        .article-description {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+        .article-paragraph {
+            font-size: 15px;
+            line-height: 1.75;
+            color: #263244;
+            margin-bottom: 1.1rem;
+        }
+        .article-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        .article-link, .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 7px 13px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .article-link {
+            background: var(--blue-700);
+            color: white;
+            border: 1px solid var(--blue-700);
+        }
+        .article-link:hover { background: var(--blue-800); border-color: var(--blue-800); }
+        .copy-btn {
+            background: white;
+            color: var(--blue-800);
+            border: 1px solid var(--border);
+        }
+        .copy-btn:hover { background: var(--blue-100); }
+
+        .article-side {
+            background: linear-gradient(180deg, var(--sky-100), var(--blue-100));
+            border-left: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+            padding: 1rem;
+        }
+        .article-side img {
+            width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: white;
+            border: 1px solid rgba(30, 64, 175, 0.12);
+        }
+        .no-img {
+            color: #64748b;
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        /* ── LOADING ── */
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 4rem 2.5rem;
+        }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 2px solid var(--border);
+            border-top-color: var(--blue-700);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 13px; color: #475569; }
+        .loading-sub  { font-size: 11px; color: #94a3b8; margin-top: 0.3rem; }
+
+        /* ── EMPTY / ERROR ── */
+        #empty-state {
+            display: block;
+            text-align: center;
+            padding: 4rem 2.5rem;
+        }
+        .empty-icon  { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.55; }
+        .empty-title { font-family: Georgia, serif; font-size: 1.2rem; color: var(--blue-800); margin-bottom: 0.4rem; }
+        .empty-sub   { font-size: 13px; color: #64748b; }
+
+        #error-state {
+            display: none;
+            margin: 0 2.5rem 1rem;
+            padding: 0.9rem 1.1rem;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-left: 3px solid #ea580c;
+            border-radius: 0 8px 8px 0;
+        }
+        .error-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #c2410c; font-weight: 700; margin-bottom: 3px; }
+        .error-msg   { font-size: 13px; color: #7c2d12; }
+
+        @media (max-width: 760px) {
+            header, .search-row, .topic-chips-wrap, #stats, .result-wrap, #error-state {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+            .article-card.visible { grid-template-columns: 1fr; }
+            .article-side { border-left: none; border-top: 1px solid var(--border); }
+        }
+        @media (max-width: 520px) {
+            .search-row { flex-direction: column; }
+            .search-row button { width: 100%; }
+            header h1 { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Cheekypedia</h1>
+    <p>Search Wikipedia and get only the intro paragraph. Beautiful!</p>
+    <div class="header-badges">
+        <span class="badge badge-blue">EggTrees Inc.</span>
+        <span class="badge badge-cyan">Wikipedia API</span>
+    </div>
+</header>
+
+<div class="search-row">
+    <input type="text" id="search-input"
+           placeholder="Search a Wikipedia article — e.g. Singapore, CRISPR, Alan Turing…"
+           autocomplete="off">
+    <button id="search-btn">Search</button>
+</div>
+
+<div class="topic-chips-wrap">
+    <div class="chips-label">Quick select</div>
+    <div class="topic-chips">
+        {% for topic in topics %}
+        <span class="chip" onclick="quickSearch('{{ topic }}')">{{ topic }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="stats"></div>
+
+<div id="error-state">
+    <div class="error-title">Error</div>
+    <div class="error-msg" id="error-msg"></div>
+</div>
+
+<div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Querying Wikipedia…</div>
+    <div class="loading-sub">Fetching the introductory paragraph</div>
+</div>
+
+<div id="empty-state">
+    <div class="empty-icon"></div>
+    <div class="empty-title">Search something to see results</div>
+    <div class="empty-sub">Type an article title above or use one of the chips.</div>
+</div>
+
+<div class="result-wrap">
+    <article class="article-card" id="article-card">
+        <div class="article-main">
+            <div class="article-kicker" id="article-kicker">Wikipedia Article</div>
+            <h2 class="article-title" id="article-title"></h2>
+            <div class="article-description" id="article-description"></div>
+            <p class="article-paragraph" id="article-paragraph"></p>
+            <div class="article-actions">
+                <a class="article-link" id="article-link" href="#" target="_blank" rel="noopener noreferrer">↗ Open full article</a>
+                <button class="copy-btn" id="copy-btn">Copy paragraph</button>
+            </div>
+        </div>
+        <aside class="article-side" id="article-side"></aside>
+    </article>
+</div>
+
+<script>
+const searchInput = document.getElementById('search-input');
+const searchBtn   = document.getElementById('search-btn');
+const loading     = document.getElementById('loading');
+const emptyState  = document.getElementById('empty-state');
+const errorState  = document.getElementById('error-state');
+const statsEl     = document.getElementById('stats');
+const articleCard = document.getElementById('article-card');
+const articleTitle = document.getElementById('article-title');
+const articleDescription = document.getElementById('article-description');
+const articleParagraph = document.getElementById('article-paragraph');
+const articleLink = document.getElementById('article-link');
+const articleSide = document.getElementById('article-side');
+const copyBtn = document.getElementById('copy-btn');
+
+function quickSearch(topic) {
+    searchInput.value = topic;
+    doSearch(topic);
+}
+
+searchBtn.addEventListener('click', () => {
+    const q = searchInput.value.trim();
+    if (q) doSearch(q);
+});
+
+searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        const q = searchInput.value.trim();
+        if (q) doSearch(q);
+    }
+});
+
+copyBtn.addEventListener('click', async () => {
+    const text = articleParagraph.textContent.trim();
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = 'Copied';
+    setTimeout(() => copyBtn.textContent = 'Copy paragraph', 1100);
+});
+
+async function doSearch(query) {
+    resetUI();
+    loading.style.display = 'block';
+    searchBtn.disabled = true;
+
+    try {
+        const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        loading.style.display = 'none';
+        searchBtn.disabled = false;
+
+        if (!res.ok || data.error) {
+            showError(data.error || 'Something broke. Classic.');
+            return;
+        }
+
+        renderArticle(data);
+    } catch (err) {
+        loading.style.display = 'none';
+        searchBtn.disabled = false;
+        showError('Network error — make sure the Flask server is running.');
+    }
+}
+
+function resetUI() {
+    errorState.style.display = 'none';
+    emptyState.style.display = 'none';
+    statsEl.style.display = 'none';
+    articleCard.classList.remove('visible');
+    articleSide.innerHTML = '';
+}
+
+function renderArticle(data) {
+    articleCard.classList.add('visible');
+    statsEl.style.display = 'block';
+    statsEl.textContent = data.is_disambiguation
+        ? `Possible disambiguation · "${data.query}"`
+        : `1 paragraph · "${data.query}"`;
+
+    articleTitle.textContent = data.title || 'Untitled';
+    articleDescription.textContent = data.description || 'Wikipedia article';
+    articleParagraph.textContent = data.paragraph;
+    articleLink.href = data.page_url;
+
+    if (data.thumbnail) {
+        const img = document.createElement('img');
+        img.src = data.thumbnail;
+        img.alt = data.title || 'Wikipedia thumbnail';
+        img.loading = 'lazy';
+        img.onerror = () => {
+            articleSide.innerHTML = '<div class="no-img"><br>Thumbnail failed to load<br><small>Open Wikipedia instead</small></div>';
+        };
+        articleSide.appendChild(img);
+    } else {
+        articleSide.innerHTML = '<div class="no-img"><br>No thumbnail on Wikipedia<br><small>Too bad</small></div>';
+    }
+}
+
+function showError(msg) {
+    errorState.style.display = 'block';
+    document.getElementById('error-msg').textContent = msg;
+    emptyState.style.display = 'block';
+}
+</script>
+</body>
+</html>
