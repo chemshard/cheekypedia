@@ -5,7 +5,17 @@ from urllib.parse import quote
 
 import requests
 from flask import Flask, jsonify, render_template, request
+from datetime import datetime
+import psutil
 
+@app.route('/healthz')
+def health_check():
+    return {
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat(),
+        'uptime': time.time() - psutil.boot_time(),
+        'memory': psutil.virtual_memory()._asdict()
+    }
 app = Flask(__name__)
 
 # Wikimedia asks API clients to send a meaningful User-Agent.
