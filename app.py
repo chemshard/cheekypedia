@@ -8,6 +8,8 @@ from flask import Flask, jsonify, render_template, request
 from datetime import datetime
 import psutil
 
+app = Flask(__name__)
+
 @app.route('/healthz')
 def health_check():
     return {
@@ -16,7 +18,6 @@ def health_check():
         'uptime': time.time() - psutil.boot_time(),
         'memory': psutil.virtual_memory()._asdict()
     }
-app = Flask(__name__)
 
 # Wikimedia asks API clients to send a meaningful User-Agent.
 # Replace the email/site bit with your own if you deploy this publicly.
